@@ -1,4 +1,4 @@
-# helm template traefik --set ports.web.nodePort=30080  --set ingressRoute.dashboard.entryPoints=={"traefik"}  --set experimental.kubernetesGateway.enabled=true --set providers.kubernetesCRD.allowCrossNamespace=true traefik/traefik --namespace traefik| kubectl apply -f - -n traefik -oyaml --dry-run | k neat > 02-traefik.yaml
+# helm template traefik --set ports.web.nodePort=30080  --set ingressRoute.dashboard.entryPoints={"web"}  --set experimental.kubernetesGateway.enabled=true --set providers.kubernetesCRD.allowCrossNamespace=true traefik/traefik --namespace traefik| kubectl apply -f - -n traefik -oyaml --dry-run | k neat > 02-traefik.yaml
 apiVersion: v1
 items:
 - apiVersion: v1
@@ -251,7 +251,7 @@ items:
     namespace: traefik
   spec:
     entryPoints:
-    - traefik
+    - web
     routes:
     - kind: Rule
       match: PathPrefix(`/dashboard`) || PathPrefix(`/api`)
