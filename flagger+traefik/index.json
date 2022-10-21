@@ -1,0 +1,25 @@
+{
+  "title": "Traefik",
+  "description": "Deploy and access the Traefik",
+  "details": {
+    "intro": {
+      "text": "intro.md"
+    },
+    "steps": [
+      {
+        "title": "Run and access",
+        "text": "step1.md"
+      }
+    ],
+    "assets": {
+      "host01": [
+        {"file": "00-crd-gatewayapi-alpha+beta.yaml", "target": "/root", "chmod": "+w"},
+        {"file": "01-crd-traefik.yaml", "target": "/root", "chmod": "+w"},
+        {"file": "02-traefik.yaml", "target": "/root", "chmod": "+w"}
+      ]
+    }
+  },
+  "backend": {
+    "imageid": "kubernetes-kubeadm-1node"
+  }
+}
