@@ -13,7 +13,7 @@ spec:
   entryPoints:
     - web
   routes:
-    - match: PathPrefix(`/canary-demo`)
+    - match: PathPrefix(`/`)
       kind: Rule
       services:
         - name: canary-demo
