@@ -1,4 +1,4 @@
-# helm template traefik --set ports.web.nodePort=30080  --set ingressRoute.dashboard.entryPoints={"web"}  --set experimental.kubernetesGateway.enabled=true --set providers.kubernetesCRD.allowCrossNamespace=true traefik/traefik --namespace traefik| kubectl apply -f - -n traefik -oyaml --dry-run | k neat > 02-traefik.yaml
+# helm template traefik --set ports.web.nodePort=30080  --set ingressRoute.dashboard.entryPoints={"web"}  --set experimental.kubernetesGateway.enabled=true --set providers.kubernetesCRD.allowCrossNamespace=true traefik/traefik --namespace kube-system | kubectl apply -f - -n kube-system -oyaml --dry-run | k neat > 02-traefik.yaml
 apiVersion: v1
 kind: Namespace
 metadata:
@@ -91,7 +91,7 @@ items:
   subjects:
   - kind: ServiceAccount
     name: traefik
-    namespace: kube-system
+    namespace: traefik
 - apiVersion: apps/v1
   kind: Deployment
   metadata:
