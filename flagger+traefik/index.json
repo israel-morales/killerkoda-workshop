@@ -15,7 +15,8 @@
       "host01": [
         {"file": "00-crd-gatewayapi-alpha+beta.yaml", "target": "/root", "chmod": "+w"},
         {"file": "01-crd-traefik.yaml", "target": "/root", "chmod": "+w"},
-        {"file": "02-traefik.yaml", "target": "/root", "chmod": "+w"}
+        {"file": "02-traefik-gatewayapi.yaml", "target": "/root", "chmod": "+w"},
+        {"file": "dashboard.yaml", "target": "/root", "chmod": "+w"}
       ]
     }
   },
