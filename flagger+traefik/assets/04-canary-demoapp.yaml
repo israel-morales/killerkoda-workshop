@@ -1,0 +1,60 @@
+# https://docs.flagger.app/tutorials/gatewayapi-progressive-delivery
+apiVersion: flagger.app/v1beta1
+kind: Canary
+metadata:
+  name: canary-demo
+  namespace: canary-demo
+spec:
+  provider: traefik
+  # deployment reference
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: canary-demo
+  # HPA reference (optional)
+  autoscalerRef:
+    apiVersion: autoscaling/v2beta2
+    kind: HorizontalPodAutoscaler
+    name: canary-demo
+  # the maximum time in seconds for the canary deployment
+  # to make progress before it is rollback (default 600s)
+  progressDeadlineSeconds: 60
+  service:
+    # ClusterIP port number
+    port: 80
+    # container port number or name
+    targetPort: 8080
+  analysis:
+    # schedule interval (default 60s)
+    interval: 10s
+    # max number of failed metric checks before rollback
+    threshold: 10
+    # max traffic percentage routed to canary
+    # percentage (0-100)
+    maxWeight: 50
+    # canary increment step
+    # percentage (0-100)
+    stepWeight: 5
+    # Traefik Prometheus checks
+    metrics:
+    - name: request-success-rate
+      interval: 1m
+      # minimum req success rate (non 5xx responses)
+      # percentage (0-100)
+      thresholdRange:
+        min: 99
+    - name: request-duration
+      interval: 1m
+      # maximum req duration P99
+      # milliseconds
+      thresholdRange:
+        max: 500
+    webhooks:
+      - name: load-test
+        type: rollout
+        url: http://flagger-loadtester.loadtest/
+        timeout: 5s
+        metadata:
+          type: cmd
+          cmd: "hey -z 10m -q 10 -c 2 -host canary-demo.localhost http://traefik.kube-system"
+          logCmdOutput: "true"

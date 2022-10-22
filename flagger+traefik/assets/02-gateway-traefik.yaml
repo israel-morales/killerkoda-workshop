@@ -1,5 +1,10 @@
 # helm template traefik  --set experimental.kubernetesGateway.enabled=true --set providers.kubernetesCRD.allowCrossNamespace=true traefik/traefik --namespace=kube-system | kubectl apply -f - -n kube-system -oyaml --dry-run | k neat> 01-traefik.yaml
 apiVersion: v1
+kind: Namespace
+metadata:
+  name: traefik
+---
+apiVersion: v1
 items:
 - apiVersion: v1
   kind: ServiceAccount
@@ -299,7 +304,28 @@ items:
     selector:
       app.kubernetes.io/instance: traefik
       app.kubernetes.io/name: traefik
-    type: LoadBalancer
+    type: NodePort
+- apiVersion: traefik.containo.us/v1alpha1
+  kind: IngressRoute
+  metadata:
+    annotations:
+      helm.sh/hook: post-install,post-upgrade
+    labels:
+      app.kubernetes.io/instance: traefik
+      app.kubernetes.io/managed-by: Helm
+      app.kubernetes.io/name: traefik
+      helm.sh/chart: traefik-11.1.1
+    name: traefik-dashboard
+    namespace: traefik
+  spec:
+    entryPoints:
+    - web
+    routes:
+    - kind: Rule
+      match: PathPrefix(`/dashboard`) || PathPrefix(`/api`)
+      services:
+      - kind: TraefikService
+        name: api@internal
 kind: List
 metadata: {}
 ---
