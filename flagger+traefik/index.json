@@ -16,8 +16,9 @@
         {"file": "00-crd-gatewayapi-alpha+beta.yaml", "target": "/root", "chmod": "+w"},
         {"file": "01-crd-traefik.yaml", "target": "/root", "chmod": "+w"},
         {"file": "02-gateway-traefik.yaml", "target": "/root", "chmod": "+w"},
-        {"file": "03-deployment-canarydemo.yaml", "target": "/root", "chmod": "+w"},
-        {"file": "04-canary-demoapp.yaml", "target": "/root", "chmod": "+w"}
+        {"file": "03-deployment-flagger.yaml", "target": "/root", "chmod": "+w"},
+        {"file": "04-deployment-demoapp.yaml", "target": "/root", "chmod": "+w"},
+        {"file": "05-canary-demoapp.yaml", "target": "/root", "chmod": "+w"}
       ]
     }
   },
