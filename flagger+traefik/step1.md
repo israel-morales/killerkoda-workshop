@@ -1,63 +1,82 @@
-
-> Services need to run on all interfaces (like 0.0.0.0) and not just localhost.
-<br>
-> Services need to be accessible via HTTP and **not** HTTPS.
-
-Install the customised K8s Dashboard YAML:
+Deploy In-tree Kubernetes Gateway Api CRDs:
 
 ```plain
-kubectl apply -f /root/dashboard.yaml
-kubectl -n kubernetes-dashboard wait --for=condition=ready pod --all
+kubectl apply -f 00-crd-gatewayapi-alpha+beta.yaml
 ```{{exec}}
 
-
-The modifications here were these arguments:
-
-```yaml
-args:
-- --namespace=kubernetes-dashboard
-- --enable-skip-login
-- --disable-settings-authorizer
-- --enable-insecure-login
-- --insecure-bind-address=0.0.0.0
-```
-
-and an updated service YAML:
-
-```yaml{10,11}
-kind: Service
-apiVersion: v1
-metadata:
-  labels:
-    k8s-app: kubernetes-dashboard
-  name: kubernetes-dashboard
-  namespace: kubernetes-dashboard
-spec:
-  ports:
-    - port: 9090
-      targetPort: 9090
-  selector:
-    k8s-app: kubernetes-dashboard
-```
-
-> You can only see resources in the dashboard depending on the token permissions: [more](https://github.com/kubernetes/dashboard/blob/master/docs/user/access-control/creating-sample-user.md)
-
-Create a ServiceAccount and use the token:
+Deploy Traefik CRDs:
 
 ```plain
-kubectl -n kubernetes-dashboard create sa admin-user
-kubectl create clusterrolebinding admin-user --clusterrole cluster-admin --serviceaccount kubernetes-dashboard:admin-user
-kubectl -n kubernetes-dashboard create token admin-user
+kubectl apply -f 01-crd-traefik.yaml
 ```{{exec}}
 
-Next we need to run port-forward:
+Deploy Gateway Api Conformant Traefik Gateway:
 
 ```plain
-kubectl -n kubernetes-dashboard port-forward service/kubernetes-dashboard 9090:9090 --address 0.0.0.0
+kubectl apply -f 02-gateway-traefik.yaml
 ```{{exec}}
 
-Now use the printed token in the terminal to log into:
+Deploy Flagger and Load Testing Deployments:
 
-[ACCESS DASHBOARD]({{TRAFFIC_HOST1_9090}}) or [ACCESS PORTS]({{TRAFFIC_SELECTOR}})
+```plain
+kubectl apply -f 03-deployment-loadtest.yaml
+kubectl apply -f 04-deployment-flagger.yaml
+```{{exec}}
 
-[TRAEFIK DASHBOARD]({{TRAFFIC_HOST1_30080}})
+Deploy Demo Application:
+
+```plain
+kubectl apply -f 05-deployment-demoapp.yaml
+```{{exec}}
+
+Check current application (Pre-Canary):
+> Notice how there are no `Kind: Service` or `Kind: TraefikService`:
+
+```plain
+clear; kubectl get all,traefikservice -n canary-demo
+```{{exec}}
+
+Deploy `kind: Canary` to expose the application to the outside world:
+
+```plain
+kubectl apply -f 06-canary-demoapp.yaml
+```{{exec}}
+
+Check current application (Post-Canary):
+> Notice `Kind: Service` and `Kind: TraefikService`:
+
+```plain
+while ! kubectl wait -n canary-demo replicaset --for=jsonpath='{.status.readyReplicas}'=2 -l app=canary-demo-primary; do sleep 1; done
+clear,kubectl get all,traefikservice -n canary-demo
+```{{exec}}
+
+Access the application using this link (open in new window for best results):
+[demo application link]({{TRAFFIC_HOST1_30080}})
+
+Modify the demo app image to trigger a successful canary deployment
+
+```plain
+kubectl -n canary-demo set image deployment/canary-demo rolloutd=argoproj/rollouts-demo:green
+```{{exec}}
+
+> The demo is set to rollout the new version incrementally and should fully cut over once all tests are successful
+
+View the rollout in real-time by viewing the percentage of traffic routing to both the primary and canary services (ctrl-C to escape):
+
+```plain
+watch 'kubectl get po -n canary-demo ; kubectl get traefikservice -n canary-demo  -oyaml'
+```{{exec}}
+
+Now let's modify the demo app with a bad image, to trigger an automated rollback
+
+```plain
+kubectl -n canary-demo set image deployment/canary-demo rolloutd=argoproj/rollouts-demo:bad-purple
+```{{exec}}
+
+This time we'll watch the Flagger controller logs
+
+```plain
+kubectl logs -n flagger -l app.kubernetes.io/name=flagger -f
+```{{exec}}
+
+done;
