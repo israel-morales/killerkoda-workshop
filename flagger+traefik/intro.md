@@ -1,1 +1,1 @@
-Run and access the Kubernetes Dashboard
+Deploy and Monitor Progressive Delivery
