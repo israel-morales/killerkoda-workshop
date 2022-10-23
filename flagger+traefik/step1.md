@@ -46,8 +46,8 @@ Check current application (Post-Canary):
 > Notice `Kind: Service` and `Kind: TraefikService`:
 
 ```plain
-while ! kubectl wait -n canary-demo replicaset --for=jsonpath='{.status.readyReplicas}'=2 -l app=canary-demo-primary; do sleep 1; done
-clear,kubectl get all,traefikservice -n canary-demo
+while ! kubectl wait --for=condition=ready pod -n canary-demo  -l app=canary-demo-primary; do sleep 1; done;
+clear; kubectl get all,traefikservice -n canary-demo
 ```{{exec}}
 
 Access the application using this link (open in new window for best results):
