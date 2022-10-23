@@ -31,10 +31,10 @@ spec:
     threshold: 10
     # max traffic percentage routed to canary
     # percentage (0-100)
-    maxWeight: 50
+    maxWeight: 60
     # canary increment step
     # percentage (0-100)
-    stepWeight: 25
+    stepWeight: 15
     # Traefik Prometheus checks
     metrics:
     - name: request-success-rate
