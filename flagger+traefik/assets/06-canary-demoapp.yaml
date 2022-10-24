@@ -26,9 +26,9 @@ spec:
     targetPort: 8080
   analysis:
     # schedule interval (default 60s)
-    interval: 10s
+    interval: 5s
     # max number of failed metric checks before rollback
-    threshold: 10
+    threshold: 3
     # max traffic percentage routed to canary
     # percentage (0-100)
     maxWeight: 60
@@ -38,13 +38,13 @@ spec:
     # Traefik Prometheus checks
     metrics:
     - name: request-success-rate
-      interval: 1m
+      interval: 20s
       # minimum req success rate (non 5xx responses)
       # percentage (0-100)
       thresholdRange:
         min: 99
     - name: request-duration
-      interval: 1m
+      interval: 20s
       # maximum req duration P99
       # milliseconds
       thresholdRange:

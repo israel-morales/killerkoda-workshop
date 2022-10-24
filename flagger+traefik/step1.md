@@ -1,3 +1,5 @@
+### Ingress Resources
+
 Deploy In-tree Kubernetes Gateway Api CRDs:
 
 ```plain
@@ -16,6 +18,8 @@ Deploy Gateway Api Conformant Traefik Gateway:
 kubectl apply -f 02-gateway-traefik.yaml
 ```{{exec}}
 
+### Application Deployments
+
 Deploy Flagger and Load Testing Deployments:
 
 ```plain
@@ -30,11 +34,12 @@ kubectl apply -f 05-deployment-demoapp.yaml
 ```{{exec}}
 
 Check current application (Pre-Canary):
-> Notice how there are no `Kind: Service` or `Kind: TraefikService`:
 
 ```plain
 clear; kubectl get all,traefikservice -n canary-demo
 ```{{exec}}
+
+> Notice: `Kind: Service` or `Kind: TraefikService` are NOT preset
 
 Deploy `kind: Canary` to expose the application to the outside world:
 
@@ -42,16 +47,20 @@ Deploy `kind: Canary` to expose the application to the outside world:
 kubectl apply -f 06-canary-demoapp.yaml
 ```{{exec}}
 
+### Testing and Monitoring
+
 Check current application (Post-Canary):
-> Notice `Kind: Service` and `Kind: TraefikService`:
 
 ```plain
-while ! kubectl wait --for=condition=ready pod -n canary-demo  -l app=canary-demo-primary; do sleep 1; done;
+while ! kubectl wait --for jsonpath='{.status.readyReplicas}'=2 replicaset -n canary-demo  -l app=canary-demo-primary --timeout 1s; do sleep 1; done;
 clear; kubectl get all,traefikservice -n canary-demo
 ```{{exec}}
 
+> Notice: `Kind: Service` and `Kind: TraefikService` are now preset
+
 Access the application using this link (open in new window for best results):
-[demo application link]({{TRAFFIC_HOST1_30080}})
+
+[Demo Application Link]({{TRAFFIC_HOST1_30080}})
 
 Modify the demo app image to trigger a successful canary deployment
 
