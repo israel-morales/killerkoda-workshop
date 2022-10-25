@@ -1,0 +1,57 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: rollouts-demo
+  namespace: rollouts-demo
+spec:
+  # replicas: 1
+  workloadRef:                                 # Reference an existing Deployment using workloadRef field
+    apiVersion: apps/v1
+    kind: Deployment
+    name: rollouts-demo
+  strategy:
+    canary:
+      stableService: stable-rollout
+      canaryService: canary-rollout
+      trafficRouting:
+        traefik:
+          weightedTraefikServiceName: rollouts-demo # specify traefikService resource name that we have created before
+      steps:
+      - setWeight: 10
+      - pause: {}  # this will halt the rollout until you manually "promote"
+      # - pause: {duration: 10}  # this will halt the rollout until you manually "promote"
+      - setWeight: 40
+      - pause: {duration: 5}
+      - setWeight: 60
+      - pause: {duration: 5}
+      - setWeight: 80
+      - pause: {duration: 5}
+      # - setWeight: 100
+  revisionHistoryLimit: 5
+  selector:
+    matchLabels:
+      app: rollouts-demo
+---
+apiVersion: autoscaling/v2beta2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: rollouts-demo
+  namespace: rollouts-demo
+spec:
+  maxReplicas: 4
+  metrics:
+  - resource:
+      name: cpu
+      target:
+        averageUtilization: 99
+        type: Utilization
+    type: Resource
+  minReplicas: 2
+  # scaleTargetRef:
+  #   apiVersion: apps/v1
+  #   kind: Deployment
+  #   name: rollouts-demo
+  scaleTargetRef:
+    apiVersion: argoproj.io/v1alpha1
+    kind: Rollout
+    name: rollouts-demo

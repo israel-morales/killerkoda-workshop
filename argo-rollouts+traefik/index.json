@@ -1,0 +1,28 @@
+{
+  "title": "Traefik x Argo Rollouts",
+  "description": "Canary deployments w/ Trafik and Argo Rollouts",
+  "details": {
+    "intro": {
+      "text": "intro.md"
+    },
+    "steps": [
+      {
+        "title": "Run and access",
+        "text": "step1.md"
+      }
+    ],
+    "assets": {
+      "host01": [
+        {"file": "00-crd-gatewayapi-alpha+beta.yaml", "target": "/root", "chmod": "+w"},
+        {"file": "01-crd-traefik.yaml", "target": "/root", "chmod": "+w"},
+        {"file": "02-gateway-traefik.yaml", "target": "/root", "chmod": "+w"},
+        {"file": "03-deployment-argo-rollouts.yaml", "target": "/root", "chmod": "+w"},
+        {"file": "04-deployment-rollouts-demo.yaml", "target": "/root", "chmod": "+w"},
+        {"file": "05-canary-rollouts-demo.yaml", "target": "/root", "chmod": "+w"}
+      ]
+    }
+  },
+  "backend": {
+    "imageid": "kubernetes-kubeadm-1node"
+  }
+}
