@@ -13,24 +13,57 @@ spec:
     canary:
       stableService: stable-rollout
       canaryService: canary-rollout
+      analysis:
+        templates:
+          - templateName: endpoint-200-response
       trafficRouting:
         traefik:
           weightedTraefikServiceName: rollouts-demo # specify traefikService resource name that we have created before
       steps:
       - setWeight: 10
-      - pause: {}  # this will halt the rollout until you manually "promote"
-      # - pause: {duration: 10}  # this will halt the rollout until you manually "promote"
+      - pause: {}             # this will halt the rollout until you manually "promote"
+      # - pause: {duration: 10}
       - setWeight: 40
       - pause: {duration: 5}
       - setWeight: 60
-      - pause: {duration: 5}
+      - pause: {duration: 5}  # pause before moving to next step
       - setWeight: 80
       - pause: {duration: 5}
-      # - setWeight: 100
   revisionHistoryLimit: 5
   selector:
     matchLabels:
       app: rollouts-demo
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: endpoint-200-response
+  namespace: rollouts-demo
+spec:
+  metrics:
+  - name: endpoint-200-response
+    failureLimit: 4
+    interval: 5s
+    count: 5
+    provider:
+      job:
+        spec:
+          ttlSecondsAfterFinished: 100  # clean up job pods after 100s
+          backoffLimit: 1
+          template:
+            spec:
+              restartPolicy: Never
+              containers:
+                - name: api-reachable
+                  image: curlimages/curl:7.73.0
+                  command:
+                    - /bin/sh
+                    - -c
+                    - |
+                      echo "curl-ing http://canary-rollout/color"
+                      curl -s -o /dev/null -I -w "%{http_code}" http://canary-rollout/color
+                      status_code=$(curl --write-out "%{http_code}\n" --silent --output /dev/null "http://canary-rollout/color");
+                      [ $status_code -eq 200 ]
 ---
 apiVersion: autoscaling/v2beta2
 kind: HorizontalPodAutoscaler
@@ -47,10 +80,6 @@ spec:
         type: Utilization
     type: Resource
   minReplicas: 2
-  # scaleTargetRef:
-  #   apiVersion: apps/v1
-  #   kind: Deployment
-  #   name: rollouts-demo
   scaleTargetRef:
     apiVersion: argoproj.io/v1alpha1
     kind: Rollout

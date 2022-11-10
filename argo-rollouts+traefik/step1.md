@@ -79,4 +79,12 @@ View Argo Rollout Logs
 kubectl logs -n argo-rollouts -l app.kubernetes.io/name=argo-rollouts
 ```{{exec}}
 
+Extra:
+
+Try deploying a bad image, view the analysis to see failed response codes (non-200)
+
+```plain
+kubectl -n rollouts-demo set image deployment/rollouts-demo rolloutd=argoproj/rollouts-demo:bad-blue
+```{{exec}}
+
 done;
