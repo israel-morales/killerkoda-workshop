@@ -180,6 +180,7 @@ items:
           - --metrics.prometheus.entrypoint=metrics
           - --providers.kubernetescrd
           - --providers.kubernetescrd.allowCrossNamespace=true
+          - --providers.kubernetescrd.allowemptyservices=true
           - --providers.kubernetesingress
           - --providers.kubernetesgateway
           - --experimental.kubernetesgateway
