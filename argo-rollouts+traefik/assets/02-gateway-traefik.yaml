@@ -180,11 +180,11 @@ items:
           - --metrics.prometheus.entrypoint=metrics
           - --providers.kubernetescrd
           - --providers.kubernetescrd.allowCrossNamespace=true
-          - --providers.kubernetescrd.allowemptyservices=true
+          - --providers.kubernetescrd.allowEmptyServices=true
           - --providers.kubernetesingress
           - --providers.kubernetesgateway
           - --experimental.kubernetesgateway
-          image: traefik:2.9.1
+          image: traefik:2.9.6
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 3
