@@ -184,7 +184,7 @@ items:
           - --providers.kubernetesingress
           - --providers.kubernetesgateway
           - --experimental.kubernetesgateway
-          image: traefik:2.9.6
+          image: traefik:2.10.3
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 3
